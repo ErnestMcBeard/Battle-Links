@@ -319,6 +319,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Assets\Scripts\Main Menu\TitleNavigation.cs" />
+    <Compile Include="Assets\Scripts\Player Scripts\GameController.cs" />
     <Compile Include="Assets\Scripts\Player Scripts\PlayerController.cs" />
     <Compile Include="Assets\Scripts\Player Scripts\PlayerHealth.cs" />
   </ItemGroup>
