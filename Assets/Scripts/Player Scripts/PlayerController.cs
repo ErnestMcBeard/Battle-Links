@@ -1,4 +1,5 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -6,6 +7,11 @@ public class PlayerController : MonoBehaviour
 {
     Animator animator;
     Rigidbody2D rigidBody2D;
+    string _horizontalAxis;
+    string _verticalAxis;
+    string _submitInput;
+    string _cancelInput = "Cancel";
+    public GameController gameController;
 
     /// <summary>
     /// Find components of the player.
@@ -14,6 +20,8 @@ public class PlayerController : MonoBehaviour
     {
         animator = GetComponent<Animator>();
         rigidBody2D = GetComponent<Rigidbody2D>();
+        //check which player this is
+        //based on player assign axis' and submit button to be correct input scope
     }
 
     /// <summary>
@@ -21,8 +29,45 @@ public class PlayerController : MonoBehaviour
     /// </summary>
     void Update()
     {
-        UpdateMovement();
+        //UpdateMovement();
+        CheckInteract();
+        CheckCancel();
+        CheckForPause();
     }
+
+    private void CheckForPause()
+    {
+        if(Input.GetAxis(_cancelInput) > 0)
+        {
+            var gameController = GameObject.FindGameObjectWithTag("GameController");
+            var scriptList = gameController.GetComponents<GameController>();
+            if(scriptList.Length > 0)
+            {
+                scriptList[0].Paused = !scriptList[0].Paused;
+            }
+        }
+    }
+
+    private void CheckCancel()
+    {
+        if(Input.GetKeyUp(KeyCode.Mouse0))
+        {
+            //Interact code here
+            //Query in the direction youre facing
+            //Find objects
+            //Broadcast message to interact, access a public method to interact
+        }
+    }
+
+    private void CheckInteract()
+    {
+        if(Input.GetKeyUp(KeyCode.Mouse1))
+        {
+            //CancelCode here
+        }
+    }
+
+
 
     /// <summary>
     /// Checks the if movement keys are pressed.  If they are, start the respective walking animation and update the velocity of the RigidBody2D.
@@ -30,58 +75,64 @@ public class PlayerController : MonoBehaviour
     /// </summary>
     void UpdateMovement()
     {
-        int currentDirection = animator.GetInteger("direction");
-        bool moving = animator.GetBool("moving");
-        Vector2 movementDirection = Vector2.zero;
-
-        if (Input.GetKey(KeyCode.A))
+        if (!gameController.Paused)
         {
-            if (currentDirection != 0 || !moving)
+            int currentDirection = animator.GetInteger("direction");
+            bool moving = animator.GetBool("moving");
+            Vector2 movementDirection = Vector2.zero;
+
+            if (Input.GetKey(KeyCode.A))
             {
-                animator.SetInteger("direction", 0);
-                animator.SetBool("moving", true);
-            }
-            movementDirection = UpdateVerticalMovement(movementDirection);
+                if (currentDirection != 0 || !moving)
+                {
+                    animator.SetInteger("direction", 0);
+                    animator.SetBool("moving", true);
+                }
+                movementDirection = UpdateVerticalMovement(movementDirection);
 
-            movementDirection.x = -1;
-        }
-        else if (Input.GetKey(KeyCode.D))
-        {
-            if (currentDirection != 2 || !moving)
+                movementDirection.x = -1;
+            }
+            else if (Input.GetKey(KeyCode.D))
             {
-                animator.SetInteger("direction", 2);
-                animator.SetBool("moving", true);
-            }
-            movementDirection = UpdateVerticalMovement(movementDirection);
+                if (currentDirection != 2 || !moving)
+                {
+                    animator.SetInteger("direction", 2);
+                    animator.SetBool("moving", true);
+                }
+                movementDirection = UpdateVerticalMovement(movementDirection);
 
-            movementDirection.x = 1;
-        }
-        else if (Input.GetKey(KeyCode.W))
-        {
-            if (currentDirection != 1 || !moving)
+                movementDirection.x = 1;
+            }
+            else if (Input.GetKey(KeyCode.W))
             {
-                animator.SetInteger("direction", 1);
-                animator.SetBool("moving", true);
-            }
+                if (currentDirection != 1 || !moving)
+                {
+                    animator.SetInteger("direction", 1);
+                    animator.SetBool("moving", true);
+                }
 
-            movementDirection.y = 1;
-        }
-        else if (Input.GetKey(KeyCode.S))
-        {
-            if (currentDirection != 3 || !moving)
+                movementDirection.y = 1;
+            }
+            else if (Input.GetKey(KeyCode.S))
             {
-                animator.SetInteger("direction", 3);
-                animator.SetBool("moving", true);
+                if (currentDirection != 3 || !moving)
+                {
+                    animator.SetInteger("direction", 3);
+                    animator.SetBool("moving", true);
+                }
+
+                movementDirection.y = -1;
+            }
+            else //No movement, set idle
+            {
+                animator.SetBool("moving", false);
             }
 
-            movementDirection.y = -1;
-        }
-        else //No movement, set idle
-        {
-            animator.SetBool("moving", false);
-        }
+            rigidBody2D.velocity = movementDirection;
 
-        rigidBody2D.velocity = movementDirection;
+            //Input.GetAxis(Horizontal) returns value 1 through -1, same for Vertical,
+            //this.gameObject.transform.Translate(Input.GetAxis(_horizontalAxis) * 5*(.01f), Input.GetAxis(_verticalAxis) * 5*.01f, 0);
+        }
     }
 
     /// <summary>
